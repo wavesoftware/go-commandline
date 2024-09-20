@@ -2,7 +2,6 @@ package commandline
 
 import (
 	"errors"
-	"io"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -24,9 +23,6 @@ type CobraProvider interface {
 	Command() *cobra.Command
 }
 
-// Option is used to configure an App.
-type Option func(*App)
-
 // New creates a new App from CobraProvider.
 func New(cp CobraProvider) *App {
 	return &App{
@@ -39,35 +35,6 @@ func New(cp CobraProvider) *App {
 func (a *App) ExecuteOrDie(options ...Option) {
 	if err := a.Execute(options...); err != nil {
 		a.Exit(retcode.Calc(err))
-	}
-}
-
-// WithArgs creates an option which sets args.
-func WithArgs(args ...string) Option {
-	return func(app *App) {
-		app.root.SetArgs(args)
-	}
-}
-
-// WithInput creates an option witch sets os.Stdin.
-func WithInput(in io.Reader) Option {
-	return func(app *App) {
-		app.root.SetIn(in)
-	}
-}
-
-// WithOutput creates an option witch sets os.Stdout and os.Stderr.
-func WithOutput(out io.Writer) Option {
-	return func(app *App) {
-		app.root.SetOut(out)
-		app.root.SetErr(out)
-	}
-}
-
-// WithExit creates an option which sets the exit function.
-func WithExit(fn func(code int)) Option {
-	return func(app *App) {
-		app.Exit = fn
 	}
 }
 
