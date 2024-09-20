@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/spf13/cobra"
+	"github.com/wavesoftware/go-commandline"
 	main "github.com/wavesoftware/go-commandline/test/cmd"
 	"github.com/wavesoftware/go-commandline/test/internal/cli"
 	"gotest.tools/v3/assert"
-
-	"github.com/wavesoftware/go-commandline"
 )
 
 func TestTheMain(t *testing.T) {
@@ -26,7 +26,9 @@ type state struct {
 
 func (s *state) opts() []commandline.Option {
 	return []commandline.Option{
-		commandline.WithOutput(&s.out),
+		commandline.WithCommand(func(cmd *cobra.Command) {
+			cmd.SetOut(&s.out)
+		}),
 		commandline.WithExit(func(code int) {
 			s.exitCode = code
 		}),

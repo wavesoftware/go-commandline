@@ -3,7 +3,7 @@ package commandline_test
 import (
 	"bytes"
 	"errors"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -15,9 +15,11 @@ func TestExecuteOrDie(t *testing.T) {
 	var buf bytes.Buffer
 	var retcode int
 	commandline.New(new(testApp)).ExecuteOrDie(
-		commandline.WithOutput(&buf),
-		commandline.WithInput(bytes.NewBufferString("Input")),
-		commandline.WithArgs("arg1", "arg2"),
+		commandline.WithCommand(func(cmd *cobra.Command) {
+			cmd.SetOut(&buf)
+			cmd.SetIn(bytes.NewBufferString("Input"))
+			cmd.SetArgs([]string{"arg1", "arg2"})
+		}),
 		commandline.WithExit(func(code int) {
 			retcode = code
 		}),
@@ -46,7 +48,7 @@ func (t testApp) Command() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			in, err := ioutil.ReadAll(cmd.InOrStdin())
+			in, err := io.ReadAll(cmd.InOrStdin())
 			if err != nil {
 				return err
 			}
