@@ -19,10 +19,8 @@ type App struct {
 	root *cobra.Command
 }
 
-// ErrorHandler is a function that will be used to handle the errors. The
-// function will be called regardless if an error has been received, so proper
-// error checking is required. If true is returned, the default error handling
-// will not be used.
+// ErrorHandler is a function that will be used to handle the errors. If true
+// is returned, the default error handling will not be used.
 type ErrorHandler func(err error) bool
 
 // CobraProvider is used to provide a Cobra command.
@@ -41,11 +39,10 @@ func New(cp CobraProvider) *App {
 // ExecuteOrDie will execute the application or perform os.Exit in case of error.
 func (a *App) ExecuteOrDie(options ...Option) {
 	err := a.Execute(options...)
-	if a.ErrorHandler == nil {
-		a.defaultErrorHandler(err)
+	if err == nil {
 		return
 	}
-	if !a.ErrorHandler(err) {
+	if a.ErrorHandler == nil || !a.ErrorHandler(err) {
 		a.defaultErrorHandler(err)
 	}
 }
