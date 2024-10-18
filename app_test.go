@@ -14,6 +14,7 @@ import (
 func TestExecuteOrDie(t *testing.T) {
 	var buf bytes.Buffer
 	var retcode int
+	var err error
 	commandline.New(new(testApp)).ExecuteOrDie(
 		commandline.WithCommand(func(cmd *cobra.Command) {
 			cmd.SetOut(&buf)
@@ -23,9 +24,14 @@ func TestExecuteOrDie(t *testing.T) {
 		commandline.WithExit(func(code int) {
 			retcode = code
 		}),
+		commandline.WithErrorHandler(func(merr error) bool {
+			err = merr
+			return false
+		}),
 	)
 	assert.Equal(t, `example Input: ["arg1" "arg2"]`, buf.String())
 	assert.Equal(t, 133, retcode)
+	assert.Assert(t, err != nil)
 }
 
 func TestExit(t *testing.T) {

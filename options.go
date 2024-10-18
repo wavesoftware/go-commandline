@@ -41,6 +41,13 @@ func WithCommand(fn func(cmd *cobra.Command)) Option {
 	}
 }
 
+// WithErrorHandler will allow changing the default error handler.
+func WithErrorHandler(fn ErrorHandler) Option {
+	return func(app *App) {
+		app.ErrorHandler = fn
+	}
+}
+
 // WithExit creates an option which sets the exit function.
 func WithExit(fn func(code int)) Option {
 	return func(app *App) {
