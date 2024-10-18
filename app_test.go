@@ -24,7 +24,7 @@ func TestExecuteOrDie(t *testing.T) {
 		commandline.WithExit(func(code int) {
 			retcode = code
 		}),
-		commandline.WithErrorHandler(func(merr error) bool {
+		commandline.WithErrorHandler(func(merr error, _ *cobra.Command) bool {
 			err = merr
 			return false
 		}),
