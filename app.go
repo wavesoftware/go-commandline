@@ -14,9 +14,16 @@ var ErrNoRootCommand = errors.New("no root command provided")
 // App represents a command line application.
 type App struct {
 	CobraProvider
+	ErrorHandler
 	Exit func(code int)
 	root *cobra.Command
 }
+
+// ErrorHandler is a function that will be used to handle the errors. The
+// function will be called regardless if an error has been received, so proper
+// error checking is required. If true is returned, the default error handling
+// will not be used.
+type ErrorHandler func(err error) bool
 
 // CobraProvider is used to provide a Cobra command.
 type CobraProvider interface {
@@ -33,8 +40,13 @@ func New(cp CobraProvider) *App {
 
 // ExecuteOrDie will execute the application or perform os.Exit in case of error.
 func (a *App) ExecuteOrDie(options ...Option) {
-	if err := a.Execute(options...); err != nil {
-		a.Exit(retcode.Calc(err))
+	err := a.Execute(options...)
+	if a.ErrorHandler == nil {
+		a.defaultErrorHandler(err)
+		return
+	}
+	if !a.ErrorHandler(err) {
+		a.defaultErrorHandler(err)
 	}
 }
 
@@ -63,4 +75,10 @@ func (a *App) init() error {
 		return ErrNoRootCommand
 	}
 	return nil
+}
+
+func (a *App) defaultErrorHandler(err error) {
+	if err != nil {
+		a.Exit(retcode.Calc(err))
+	}
 }
